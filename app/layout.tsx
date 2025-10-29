@@ -2,6 +2,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import { Toaster } from 'react-hot-toast';
+import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
   title: 'TA Management System',
@@ -10,20 +11,31 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
-        {children}
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: '#1f2937',
-              color: '#fff',
-              border: '1px solid #374151',
-            },
-          }}
-        />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <a href="#main-content" className="skip-to-content">
+            Skip to content
+          </a>
+          {children}
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              className: '',
+              style: {
+                background: 'hsl(var(--card))',
+                color: 'hsl(var(--card-foreground))',
+                border: '1px solid hsl(var(--border))',
+              },
+            }}
+          />
+        </ThemeProvider>
       </body>
     </html>
   );

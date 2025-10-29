@@ -1,144 +1,123 @@
-'use client'
+"use client"
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { GraduationCap, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
+
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [isSignUp, setIsSignUp] = useState(false)
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const redirectTo = searchParams.get('redirectTo') || '/dashboard'
 
-  const supabase = createClient()
-
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      // Call our mock login API
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
       })
 
-      if (error) throw error
+      const data = await response.json()
 
-      toast.success('Signed in successfully!')
-      router.push(redirectTo)
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed')
+      }
+
+      toast.success(`Welcome, ${data.user.name}!`)
+      router.push('/dashboard')
       router.refresh()
     } catch (error: any) {
-      toast.error(error.message || 'Failed to sign in')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-
-    try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
-      })
-
-      if (error) throw error
-
-      toast.success('Check your email to confirm your account!')
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to sign up')
+      toast.error(error.message || 'Invalid credentials')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
-            {isSignUp ? 'Create your account' : 'Sign in to your account'}
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-400">
-            TA Management System
-          </p>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
+      >
+        <div className="flex flex-col items-center mb-8">
+          <Link href="/" className="flex items-center gap-2 mb-4 hover:opacity-80 transition-opacity">
+            <GraduationCap className="h-8 w-8" />
+            <span className="font-bold text-2xl">TA Management</span>
+          </Link>
         </div>
 
-        <form
-          className="mt-8 space-y-6"
-          onSubmit={isSignUp ? handleSignUp : handleSignIn}
-        >
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-700 placeholder-gray-500 text-white bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-700 placeholder-gray-500 text-white bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-              />
-            </div>
-          </div>
+        <Card>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl text-center">Sign in</CardTitle>
+            <CardDescription className="text-center">
+              Enter your credentials to access the dashboard
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="admin@test.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                />
+              </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading
-                ? 'Loading...'
-                : isSignUp
-                ? 'Sign up'
-                : 'Sign in'}
-            </button>
-          </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {loading ? 'Signing in...' : 'Sign in'}
+              </Button>
+            </form>
 
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-blue-400 hover:text-blue-300"
-            >
-              {isSignUp
-                ? 'Already have an account? Sign in'
-                : "Don't have an account? Sign up"}
-            </button>
-          </div>
-        </form>
-      </div>
+            <div className="mt-6 p-4 bg-muted rounded-lg space-y-2">
+              <p className="text-sm font-medium">Demo Credentials:</p>
+              <ul className="text-xs space-y-1 text-muted-foreground">
+                <li>Admin: admin@test.com / admin123</li>
+                <li>Staff: staff@test.com / staff123</li>
+                <li>TA: ta@test.com / ta123</li>
+              </ul>
+            </div>
+
+            <div className="mt-4 text-center text-sm">
+              <Link href="/" className="text-muted-foreground hover:text-primary">
+                ← Back to home
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   )
 }
