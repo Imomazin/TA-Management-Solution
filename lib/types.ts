@@ -56,3 +56,54 @@ export interface Activity {
   timestamp: string
   user: string
 }
+
+export interface ScheduleSlot {
+  id: string
+  taId: string
+  taName: string
+  courseId: string
+  courseName: string
+  dayOfWeek: number // 0 = Sunday, 1 = Monday, etc.
+  startTime: string // e.g., "09:00"
+  endTime: string // e.g., "11:00"
+  location: string
+  type: 'lab' | 'office-hours' | 'lecture' | 'grading'
+  recurring: boolean
+  color?: string
+}
+
+export interface ScheduleConflict {
+  id: string
+  taId: string
+  taName: string
+  conflictType: 'overlap' | 'capacity' | 'back-to-back'
+  severity: 'warning' | 'error'
+  description: string
+  affectedSlots: string[] // slot IDs
+}
+
+export interface CapacityRule {
+  id: string
+  name: string
+  type: 'max-hours-per-week' | 'max-hours-per-day' | 'min-break-time' | 'max-courses'
+  value: number
+  unit: string
+  enforced: boolean
+}
+
+export interface CapacityUtilization {
+  taId: string
+  taName: string
+  hoursScheduled: number
+  hoursCapacity: number
+  utilizationPercent: number
+  conflictCount: number
+  status: 'under' | 'optimal' | 'over'
+}
+
+export interface WeekView {
+  weekNumber: number
+  startDate: string
+  endDate: string
+  slots: ScheduleSlot[]
+}

@@ -3,7 +3,7 @@
  * This provides static seed data for development and demo purposes
  */
 
-import type { TA, Course, Assignment, Timesheet, Activity } from './types'
+import type { TA, Course, Assignment, Timesheet, Activity, ScheduleSlot, ScheduleConflict, CapacityRule, CapacityUtilization } from './types'
 
 // Sample TA data
 export const mockTAs: TA[] = [
@@ -436,4 +436,490 @@ export const mockKPIData: KPIData = {
   trendCourses: 0,
   trendAssignments: -8.3,
   trendHours: 5.2,
+}
+// Schedule Slots
+export const mockScheduleSlots: ScheduleSlot[] = [
+  // Alice Johnson - CS101 & CS102
+  {
+    id: 's1',
+    taId: '1',
+    taName: 'Alice Johnson',
+    courseId: '1',
+    courseName: 'CS101',
+    dayOfWeek: 1, // Monday
+    startTime: '09:00',
+    endTime: '11:00',
+    location: 'Lab 101',
+    type: 'lab',
+    recurring: true,
+    color: 'hsl(var(--chart-1))',
+  },
+  {
+    id: 's2',
+    taId: '1',
+    taName: 'Alice Johnson',
+    courseId: '1',
+    courseName: 'CS101',
+    dayOfWeek: 3, // Wednesday
+    startTime: '14:00',
+    endTime: '16:00',
+    location: 'Office 205',
+    type: 'office-hours',
+    recurring: true,
+    color: 'hsl(var(--chart-1))',
+  },
+  {
+    id: 's3',
+    taId: '1',
+    taName: 'Alice Johnson',
+    courseId: '2',
+    courseName: 'CS102',
+    dayOfWeek: 2, // Tuesday
+    startTime: '10:00',
+    endTime: '12:00',
+    location: 'Lab 102',
+    type: 'lab',
+    recurring: true,
+    color: 'hsl(var(--chart-2))',
+  },
+  {
+    id: 's4',
+    taId: '1',
+    taName: 'Alice Johnson',
+    courseId: '2',
+    courseName: 'CS102',
+    dayOfWeek: 4, // Thursday
+    startTime: '13:00',
+    endTime: '15:00',
+    location: 'Office 205',
+    type: 'grading',
+    recurring: true,
+    color: 'hsl(var(--chart-2))',
+  },
+
+  // Bob Smith - MATH201
+  {
+    id: 's5',
+    taId: '2',
+    taName: 'Bob Smith',
+    courseId: '6',
+    courseName: 'MATH201',
+    dayOfWeek: 1, // Monday
+    startTime: '14:00',
+    endTime: '17:00',
+    location: 'Math Building 301',
+    type: 'office-hours',
+    recurring: true,
+    color: 'hsl(var(--chart-3))',
+  },
+  {
+    id: 's6',
+    taId: '2',
+    taName: 'Bob Smith',
+    courseId: '6',
+    courseName: 'MATH201',
+    dayOfWeek: 3, // Wednesday
+    startTime: '10:00',
+    endTime: '12:00',
+    location: 'Math Building 301',
+    type: 'lab',
+    recurring: true,
+    color: 'hsl(var(--chart-3))',
+  },
+  {
+    id: 's7',
+    taId: '2',
+    taName: 'Bob Smith',
+    courseId: '6',
+    courseName: 'MATH201',
+    dayOfWeek: 5, // Friday
+    startTime: '09:00',
+    endTime: '11:00',
+    location: 'Math Building 301',
+    type: 'grading',
+    recurring: true,
+    color: 'hsl(var(--chart-3))',
+  },
+
+  // Carol Davis - CS201 & CS301
+  {
+    id: 's8',
+    taId: '3',
+    taName: 'Carol Davis',
+    courseId: '3',
+    courseName: 'CS201',
+    dayOfWeek: 2, // Tuesday
+    startTime: '09:00',
+    endTime: '11:00',
+    location: 'Lab 201',
+    type: 'lab',
+    recurring: true,
+    color: 'hsl(var(--chart-4))',
+  },
+  {
+    id: 's9',
+    taId: '3',
+    taName: 'Carol Davis',
+    courseId: '3',
+    courseName: 'CS201',
+    dayOfWeek: 4, // Thursday
+    startTime: '10:00',
+    endTime: '12:00',
+    location: 'Office 310',
+    type: 'office-hours',
+    recurring: true,
+    color: 'hsl(var(--chart-4))',
+  },
+  {
+    id: 's10',
+    taId: '3',
+    taName: 'Carol Davis',
+    courseId: '4',
+    courseName: 'CS301',
+    dayOfWeek: 1, // Monday
+    startTime: '13:00',
+    endTime: '15:00',
+    location: 'Lab 301',
+    type: 'lab',
+    recurring: true,
+    color: 'hsl(var(--chart-5))',
+  },
+  {
+    id: 's11',
+    taId: '3',
+    taName: 'Carol Davis',
+    courseId: '4',
+    courseName: 'CS301',
+    dayOfWeek: 3, // Wednesday
+    startTime: '15:00',
+    endTime: '17:00',
+    location: 'Office 310',
+    type: 'office-hours',
+    recurring: true,
+    color: 'hsl(var(--chart-5))',
+  },
+
+  // Emma Brown - CS101
+  {
+    id: 's12',
+    taId: '5',
+    taName: 'Emma Brown',
+    courseId: '1',
+    courseName: 'CS101',
+    dayOfWeek: 2, // Tuesday
+    startTime: '14:00',
+    endTime: '16:00',
+    location: 'Lab 101',
+    type: 'lab',
+    recurring: true,
+    color: 'hsl(var(--chart-1))',
+  },
+  {
+    id: 's13',
+    taId: '5',
+    taName: 'Emma Brown',
+    courseId: '1',
+    courseName: 'CS101',
+    dayOfWeek: 4, // Thursday
+    startTime: '10:00',
+    endTime: '12:00',
+    location: 'Office 105',
+    type: 'office-hours',
+    recurring: true,
+    color: 'hsl(var(--chart-1))',
+  },
+
+  // Grace Lee - MATH101 & MATH201
+  {
+    id: 's14',
+    taId: '7',
+    taName: 'Grace Lee',
+    courseId: '5',
+    courseName: 'MATH101',
+    dayOfWeek: 1, // Monday
+    startTime: '10:00',
+    endTime: '12:00',
+    location: 'Math Building 101',
+    type: 'lab',
+    recurring: true,
+    color: 'hsl(var(--chart-2))',
+  },
+  {
+    id: 's15',
+    taId: '7',
+    taName: 'Grace Lee',
+    courseId: '5',
+    courseName: 'MATH101',
+    dayOfWeek: 3, // Wednesday
+    startTime: '09:00',
+    endTime: '11:00',
+    location: 'Math Building 101',
+    type: 'office-hours',
+    recurring: true,
+    color: 'hsl(var(--chart-2))',
+  },
+  {
+    id: 's16',
+    taId: '7',
+    taName: 'Grace Lee',
+    courseId: '6',
+    courseName: 'MATH201',
+    dayOfWeek: 2, // Tuesday
+    startTime: '14:00',
+    endTime: '16:00',
+    location: 'Math Building 301',
+    type: 'lab',
+    recurring: true,
+    color: 'hsl(var(--chart-3))',
+  },
+
+  // Henry Chen - CS301
+  {
+    id: 's17',
+    taId: '8',
+    taName: 'Henry Chen',
+    courseId: '4',
+    courseName: 'CS301',
+    dayOfWeek: 1, // Monday
+    startTime: '09:00',
+    endTime: '12:00',
+    location: 'Lab 301',
+    type: 'lab',
+    recurring: true,
+    color: 'hsl(var(--chart-5))',
+  },
+  {
+    id: 's18',
+    taId: '8',
+    taName: 'Henry Chen',
+    courseId: '4',
+    courseName: 'CS301',
+    dayOfWeek: 3, // Wednesday
+    startTime: '10:00',
+    endTime: '13:00',
+    location: 'Lab 301',
+    type: 'lab',
+    recurring: true,
+    color: 'hsl(var(--chart-5))',
+  },
+  {
+    id: 's19',
+    taId: '8',
+    taName: 'Henry Chen',
+    courseId: '4',
+    courseName: 'CS301',
+    dayOfWeek: 5, // Friday
+    startTime: '14:00',
+    endTime: '17:00',
+    location: 'Office 315',
+    type: 'office-hours',
+    recurring: true,
+    color: 'hsl(var(--chart-5))',
+  },
+]
+
+// Schedule Conflicts
+export const mockScheduleConflicts: ScheduleConflict[] = [
+  {
+    id: 'c1',
+    taId: '3',
+    taName: 'Carol Davis',
+    conflictType: 'capacity',
+    severity: 'warning',
+    description: 'Approaching maximum 20 hours per week (currently at 18 hours)',
+    affectedSlots: ['s8', 's9', 's10', 's11'],
+  },
+  {
+    id: 'c2',
+    taId: '8',
+    taName: 'Henry Chen',
+    conflictType: 'capacity',
+    severity: 'error',
+    description: 'Exceeds maximum 20 hours per week (currently at 22 hours)',
+    affectedSlots: ['s17', 's18', 's19'],
+  },
+  {
+    id: 'c3',
+    taId: '2',
+    taName: 'Bob Smith',
+    conflictType: 'back-to-back',
+    severity: 'warning',
+    description: 'Back-to-back sessions with less than 30 minutes break',
+    affectedSlots: ['s6', 's7'],
+  },
+]
+
+// Capacity Rules
+export const mockCapacityRules: CapacityRule[] = [
+  {
+    id: 'r1',
+    name: 'Maximum Weekly Hours',
+    type: 'max-hours-per-week',
+    value: 20,
+    unit: 'hours',
+    enforced: true,
+  },
+  {
+    id: 'r2',
+    name: 'Maximum Daily Hours',
+    type: 'max-hours-per-day',
+    value: 8,
+    unit: 'hours',
+    enforced: true,
+  },
+  {
+    id: 'r3',
+    name: 'Minimum Break Time',
+    type: 'min-break-time',
+    value: 30,
+    unit: 'minutes',
+    enforced: false,
+  },
+  {
+    id: 'r4',
+    name: 'Maximum Courses',
+    type: 'max-courses',
+    value: 2,
+    unit: 'courses',
+    enforced: false,
+  },
+]
+
+// Capacity Utilization
+export const mockCapacityUtilization: CapacityUtilization[] = [
+  {
+    taId: '1',
+    taName: 'Alice Johnson',
+    hoursScheduled: 18,
+    hoursCapacity: 20,
+    utilizationPercent: 90,
+    conflictCount: 0,
+    status: 'optimal',
+  },
+  {
+    taId: '2',
+    taName: 'Bob Smith',
+    hoursScheduled: 15,
+    hoursCapacity: 15,
+    utilizationPercent: 100,
+    conflictCount: 1,
+    status: 'optimal',
+  },
+  {
+    taId: '3',
+    taName: 'Carol Davis',
+    hoursScheduled: 18,
+    hoursCapacity: 20,
+    utilizationPercent: 90,
+    conflictCount: 1,
+    status: 'optimal',
+  },
+  {
+    taId: '5',
+    taName: 'Emma Brown',
+    hoursScheduled: 8,
+    hoursCapacity: 10,
+    utilizationPercent: 80,
+    conflictCount: 0,
+    status: 'optimal',
+  },
+  {
+    taId: '7',
+    taName: 'Grace Lee',
+    hoursScheduled: 12,
+    hoursCapacity: 15,
+    utilizationPercent: 80,
+    conflictCount: 0,
+    status: 'optimal',
+  },
+  {
+    taId: '8',
+    taName: 'Henry Chen',
+    hoursScheduled: 22,
+    hoursCapacity: 20,
+    utilizationPercent: 110,
+    conflictCount: 1,
+    status: 'over',
+  },
+]
+
+// Helper function to calculate hours from time slots
+export function calculateHoursFromSlot(startTime: string, endTime: string): number {
+  const [startHour, startMin] = startTime.split(':').map(Number)
+  const [endHour, endMin] = endTime.split(':').map(Number)
+  const startMinutes = startHour * 60 + startMin
+  const endMinutes = endHour * 60 + endMin
+  return (endMinutes - startMinutes) / 60
+}
+
+// Helper function to detect conflicts
+export function detectTimeConflicts(slots: ScheduleSlot[]): ScheduleConflict[] {
+  const conflicts: ScheduleConflict[] = []
+
+  // Group by TA
+  const slotsByTA = slots.reduce((acc, slot) => {
+    if (!acc[slot.taId]) acc[slot.taId] = []
+    acc[slot.taId].push(slot)
+    return acc
+  }, {} as Record<string, ScheduleSlot[]>)
+
+  // Check for overlaps and capacity for each TA
+  Object.entries(slotsByTA).forEach(([taId, taSlots]) => {
+    // Check for time overlaps on same day
+    const slotsByDay = taSlots.reduce((acc, slot) => {
+      if (!acc[slot.dayOfWeek]) acc[slot.dayOfWeek] = []
+      acc[slot.dayOfWeek].push(slot)
+      return acc
+    }, {} as Record<number, ScheduleSlot[]>)
+
+    Object.values(slotsByDay).forEach(daySlots => {
+      for (let i = 0; i < daySlots.length; i++) {
+        for (let j = i + 1; j < daySlots.length; j++) {
+          const slot1 = daySlots[i]
+          const slot2 = daySlots[j]
+
+          if (slot1.startTime < slot2.endTime && slot2.startTime < slot1.endTime) {
+            conflicts.push({
+              id: `overlap-${slot1.id}-${slot2.id}`,
+              taId: slot1.taId,
+              taName: slot1.taName,
+              conflictType: 'overlap',
+              severity: 'error',
+              description: `Time overlap between ${slot1.courseName} and ${slot2.courseName}`,
+              affectedSlots: [slot1.id, slot2.id],
+            })
+          }
+        }
+      }
+    })
+
+    // Check total weekly hours
+    const totalHours = taSlots.reduce((sum, slot) => {
+      return sum + calculateHoursFromSlot(slot.startTime, slot.endTime)
+    }, 0)
+
+    if (totalHours > 20) {
+      conflicts.push({
+        id: `capacity-${taId}`,
+        taId,
+        taName: taSlots[0].taName,
+        conflictType: 'capacity',
+        severity: 'error',
+        description: `Exceeds maximum 20 hours per week (${totalHours} hours scheduled)`,
+        affectedSlots: taSlots.map(s => s.id),
+      })
+    } else if (totalHours > 18) {
+      conflicts.push({
+        id: `capacity-warning-${taId}`,
+        taId,
+        taName: taSlots[0].taName,
+        conflictType: 'capacity',
+        severity: 'warning',
+        description: `Approaching maximum 20 hours per week (${totalHours} hours scheduled)`,
+        affectedSlots: taSlots.map(s => s.id),
+      })
+    }
+  })
+
+  return conflicts
 }

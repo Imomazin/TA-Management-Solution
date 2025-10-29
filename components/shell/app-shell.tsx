@@ -11,6 +11,8 @@ import {
   BookOpen,
   ClipboardList,
   Clock,
+  Calendar,
+  TrendingUp,
   Search,
   Bell,
   LogOut,
@@ -38,6 +40,8 @@ const navigation = [
   { name: 'Courses', href: '/courses', icon: BookOpen },
   { name: 'Assignments', href: '/assignments', icon: ClipboardList },
   { name: 'Timesheets', href: '/timesheets', icon: Clock },
+  { name: 'Schedule', href: '/schedule', icon: Calendar },
+  { name: 'Capacity', href: '/capacity', icon: TrendingUp },
 ]
 
 interface AppShellProps {
