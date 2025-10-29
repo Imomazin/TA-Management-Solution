@@ -1,7 +1,7 @@
 // app/layout.tsx
 import './globals.css';
 import type { Metadata } from 'next';
-import { Toaster } from 'react-hot-toast';
+import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
@@ -23,18 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             Skip to content
           </a>
           {children}
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              className: '',
-              style: {
-                background: 'hsl(var(--card))',
-                color: 'hsl(var(--card-foreground))',
-                border: '1px solid hsl(var(--border))',
-              },
-            }}
-          />
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

@@ -16,6 +16,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { BackgroundStreaks } from '@/components/ui/background-streaks'
 
 const features = [
   {
@@ -100,12 +101,13 @@ export default function LandingPage() {
 
       <main id="main-content" className="flex-1">
         {/* Hero Section */}
-        <section className="container py-24 md:py-32">
+        <section className="container py-24 md:py-32 relative">
+          <BackgroundStreaks variant="hero" />
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-col items-center text-center space-y-8"
+            className="flex flex-col items-center text-center space-y-8 relative z-10"
           >
             <div className="space-y-4 max-w-3xl">
               <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">

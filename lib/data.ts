@@ -923,3 +923,207 @@ export function detectTimeConflicts(slots: ScheduleSlot[]): ScheduleConflict[] {
 
   return conflicts
 }
+
+// Notifications
+import type { Notification, EmailTemplate, AuditLog } from './types'
+
+export const mockNotifications: Notification[] = [
+  {
+    id: 'n1',
+    type: 'info',
+    category: 'schedule',
+    title: 'Schedule Updated',
+    message: 'Your office hours for CS101 have been moved to Wednesday 2-4 PM',
+    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 mins ago
+    read: false,
+    actionUrl: '/schedule',
+    actionText: 'View Schedule',
+  },
+  {
+    id: 'n2',
+    type: 'success',
+    category: 'timesheet',
+    title: 'Timesheet Approved',
+    message: 'Your timesheet for week of Oct 21 has been approved (20 hours)',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
+    read: false,
+    actionUrl: '/timesheets',
+    actionText: 'View Timesheets',
+  },
+  {
+    id: 'n3',
+    type: 'warning',
+    category: 'schedule',
+    title: 'Capacity Warning',
+    message: 'You are approaching maximum 20 hours per week (currently at 18 hours)',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
+    read: true,
+    actionUrl: '/capacity',
+    actionText: 'Check Capacity',
+  },
+  {
+    id: 'n4',
+    type: 'info',
+    category: 'assignment',
+    title: 'New Assignment',
+    message: 'You have been assigned to assist with CS301 - Operating Systems',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
+    read: true,
+    actionUrl: '/assignments',
+    actionText: 'View Assignment',
+  },
+  {
+    id: 'n5',
+    type: 'error',
+    category: 'timesheet',
+    title: 'Timesheet Rejected',
+    message: 'Your timesheet for week of Oct 14 was rejected. Please revise and resubmit.',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(), // 2 days ago
+    read: true,
+    actionUrl: '/timesheets',
+    actionText: 'Revise Timesheet',
+  },
+  {
+    id: 'n6',
+    type: 'info',
+    category: 'system',
+    title: 'System Maintenance',
+    message: 'Scheduled maintenance on Nov 5, 2024 from 2-4 AM EST',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(), // 3 days ago
+    read: true,
+  },
+]
+
+// Email Templates
+export const mockEmailTemplates: EmailTemplate[] = [
+  {
+    id: 'et1',
+    name: 'Welcome Email',
+    subject: 'Welcome to TA Management System, {{userName}}!',
+    body: `Hi {{userName}},
+
+Welcome to the TA Management System at Florida Atlantic University!
+
+Your account has been created successfully. You can now:
+- View your schedule and assignments
+- Submit timesheets
+- Manage your availability
+- Communicate with instructors
+
+Log in to get started: {{loginUrl}}
+
+If you have any questions, please contact support@fau.edu.
+
+Best regards,
+TA Management Team`,
+    variables: ['userName', 'loginUrl'],
+  },
+  {
+    id: 'et2',
+    name: 'Schedule Change Notification',
+    subject: 'Schedule Change for {{courseName}}',
+    body: `Hi {{taName}},
+
+Your schedule for {{courseName}} has been updated:
+
+Previous: {{oldSchedule}}
+New: {{newSchedule}}
+
+Please review your updated schedule and confirm your availability.
+
+View full schedule: {{scheduleUrl}}
+
+If you have any conflicts, please contact {{instructorName}} at {{instructorEmail}}.
+
+Best regards,
+TA Management Team`,
+    variables: ['taName', 'courseName', 'oldSchedule', 'newSchedule', 'scheduleUrl', 'instructorName', 'instructorEmail'],
+  },
+  {
+    id: 'et3',
+    name: 'Weekly Summary',
+    subject: 'Your Weekly TA Summary - Week of {{weekStart}}',
+    body: `Hi {{taName}},
+
+Here's your TA activity summary for the week of {{weekStart}}:
+
+📊 Hours Worked: {{hoursWorked}}/{{hoursCapacity}}
+📚 Courses: {{coursesList}}
+✅ Timesheets: {{timesheetStatus}}
+📅 Upcoming: {{upcomingEvents}}
+
+Utilization: {{utilizationPercent}}%
+
+{{#if hasConflicts}}
+⚠️ You have {{conflictCount}} scheduling conflict(s) that need attention.
+{{/if}}
+
+View detailed dashboard: {{dashboardUrl}}
+
+Keep up the great work!
+
+Best regards,
+TA Management Team`,
+    variables: ['taName', 'weekStart', 'hoursWorked', 'hoursCapacity', 'coursesList', 'timesheetStatus', 'upcomingEvents', 'utilizationPercent', 'hasConflicts', 'conflictCount', 'dashboardUrl'],
+  },
+]
+
+// Audit Logs
+export const mockAuditLogs: AuditLog[] = [
+  {
+    id: 'al1',
+    userId: '1',
+    userName: 'Alice Johnson',
+    userRole: 'ta',
+    action: 'update',
+    entity: 'timesheet',
+    entityId: 'ts1',
+    changes: {
+      hoursWorked: { old: 18, new: 20 },
+      status: { old: 'draft', new: 'submitted' },
+    },
+    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    ipAddress: '192.168.1.100',
+  },
+  {
+    id: 'al2',
+    userId: 'admin1',
+    userName: 'John Admin',
+    userRole: 'admin',
+    action: 'create',
+    entity: 'assignment',
+    entityId: 'a1',
+    changes: {
+      taId: { old: null, new: '5' },
+      courseId: { old: null, new: '1' },
+      hoursPerWeek: { old: null, new: 10 },
+    },
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+    ipAddress: '192.168.1.50',
+  },
+  {
+    id: 'al3',
+    userId: 'instructor1',
+    userName: 'Prof. Sarah Johnson',
+    userRole: 'instructor',
+    action: 'approve',
+    entity: 'timesheet',
+    entityId: 'ts2',
+    changes: {
+      status: { old: 'submitted', new: 'approved' },
+    },
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+    ipAddress: '192.168.1.75',
+  },
+  {
+    id: 'al4',
+    userId: 'admin1',
+    userName: 'John Admin',
+    userRole: 'admin',
+    action: 'delete',
+    entity: 'schedule_slot',
+    entityId: 's20',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+    ipAddress: '192.168.1.50',
+  },
+]

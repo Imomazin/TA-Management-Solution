@@ -13,6 +13,8 @@ import {
   Clock,
   Calendar,
   TrendingUp,
+  BarChart3,
+  Shield,
   Search,
   Bell,
   LogOut,
@@ -33,6 +35,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Badge } from '@/components/ui/badge'
+import { NotificationCenter } from '@/components/notifications/notification-center'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -42,6 +45,8 @@ const navigation = [
   { name: 'Timesheets', href: '/timesheets', icon: Clock },
   { name: 'Schedule', href: '/schedule', icon: Calendar },
   { name: 'Capacity', href: '/capacity', icon: TrendingUp },
+  { name: 'Reports', href: '/reports', icon: BarChart3 },
+  { name: 'Admin', href: '/admin', icon: Shield, adminOnly: true },
 ]
 
 interface AppShellProps {
@@ -81,24 +86,26 @@ export function AppShell({ children, user }: AppShellProps) {
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1 p-4">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-primary text-primary-foreground'
-                      : 'hover:bg-accent hover:text-accent-foreground'
-                  }`}
-                >
-                  <item.icon className="h-5 w-5" />
-                  {item.name}
-                </Link>
-              )
-            })}
+            {navigation
+              .filter((item: any) => !item.adminOnly || user.role === 'admin')
+              .map((item) => {
+                const isActive = pathname === item.href
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={() => setSidebarOpen(false)}
+                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'bg-primary text-primary-foreground'
+                        : 'hover:bg-accent hover:text-accent-foreground'
+                    }`}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    {item.name}
+                  </Link>
+                )
+              })}
           </nav>
 
           {/* User info */}
@@ -147,12 +154,7 @@ export function AppShell({ children, user }: AppShellProps) {
             <ThemeToggle />
 
             {/* Notifications */}
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5" />
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px]">
-                3
-              </Badge>
-            </Button>
+            <NotificationCenter />
 
             {/* User menu */}
             <DropdownMenu>

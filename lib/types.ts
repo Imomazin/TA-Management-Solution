@@ -107,3 +107,36 @@ export interface WeekView {
   endDate: string
   slots: ScheduleSlot[]
 }
+
+export interface Notification {
+  id: string
+  type: 'info' | 'success' | 'warning' | 'error'
+  category: 'system' | 'schedule' | 'timesheet' | 'assignment' | 'message'
+  title: string
+  message: string
+  timestamp: string
+  read: boolean
+  actionUrl?: string
+  actionText?: string
+}
+
+export interface EmailTemplate {
+  id: string
+  name: string
+  subject: string
+  body: string
+  variables: string[] // e.g., ['userName', 'courseName']
+}
+
+export interface AuditLog {
+  id: string
+  userId: string
+  userName: string
+  userRole: string
+  action: string
+  entity: string
+  entityId: string
+  changes?: Record<string, { old: any; new: any }>
+  timestamp: string
+  ipAddress?: string
+}
