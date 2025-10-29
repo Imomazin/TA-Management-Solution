@@ -1,12 +1,23 @@
 # TA Management System
 
-Teaching Assistant Management Platform built with Next.js 15, TypeScript, Tailwind CSS, and Supabase.
+Teaching Assistant Management Platform built with Next.js 15, TypeScript, Tailwind CSS, Prisma, and Supabase.
 
 ## Tech Stack
 
 - **Frontend**: Next.js 15, TypeScript, Tailwind CSS
 - **Backend**: Supabase (PostgreSQL, Auth, Storage, RLS)
+- **ORM**: Prisma
+- **Error Tracking**: Sentry
+- **Testing**: Playwright (E2E)
 - **Deployment**: Vercel
+- **CI/CD**: GitHub Actions
+
+## Prerequisites
+
+- Node.js 22+ (use `nvm use` to set the correct version)
+- npm or yarn
+- A Supabase account
+- A Sentry account (optional, for error tracking)
 
 ## Setup Instructions
 
@@ -14,20 +25,21 @@ Teaching Assistant Management Platform built with Next.js 15, TypeScript, Tailwi
 
 ```bash
 git clone <repository-url>
-cd ta-management
+cd TA-Management-Solution
 ```
 
 ### 2. Install Dependencies
 
 ```bash
-npm install --legacy-peer-deps
+npm install
 ```
 
 ### 3. Set Up Supabase
 
 1. Create a new project at [supabase.com](https://supabase.com)
-2. Run the SQL migrations in `supabase/migrations/` folder
-3. Copy your project URL and anon key from Project Settings > API
+2. Go to Project Settings > Database > Connection String > URI
+3. Copy your connection string (you'll need this for DATABASE_URL)
+4. Copy your project URL and anon key from Project Settings > API
 
 ### 4. Configure Environment Variables
 
@@ -35,25 +47,49 @@ npm install --legacy-peer-deps
 cp .env.sample .env.local
 ```
 
-Edit `.env.local` and add your Supabase credentials:
+Edit `.env.local` and add your credentials:
 
-```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# Database Configuration (Prisma)
+DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
+
+# Sentry Configuration (Optional)
+NEXT_PUBLIC_SENTRY_DSN=your_sentry_dsn_here
+SENTRY_ORG=your_sentry_org
+SENTRY_PROJECT=your_sentry_project
+SENTRY_AUTH_TOKEN=your_sentry_auth_token
+
+# Email configuration
+EMAIL_FROM=noreply@university.edu
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-### 5. Run Database Migrations
+### 5. Generate Prisma Client
 
-Execute all SQL files in `supabase/migrations/` in your Supabase SQL editor.
+```bash
+npm run prisma:generate
+```
 
-### 6. Seed the Database
+### 6. Run Database Migrations
+
+```bash
+npm run prisma:migrate
+```
+
+This will create all the necessary tables in your Supabase database.
+
+### 7. Seed the Database (Optional)
 
 ```bash
 npm run seed
 ```
 
-### 7. Start Development Server
+### 8. Start Development Server
 
 ```bash
 npm run dev
@@ -74,27 +110,41 @@ After running the seed script, use these credentials:
 ## Project Structure
 
 ```
-ta-management/
-├── src/
-│   ├── app/              # Next.js app directory
-│   ├── components/       # Reusable components
-│   ├── lib/              # Utilities and configurations
-│   ├── types/            # TypeScript type definitions
-│   └── middleware.ts     # Auth middleware
-├── supabase/
-│   └── migrations/       # SQL migration files
+TA-Management-Solution/
+├── app/                   # Next.js app directory (App Router)
+│   ├── layout.tsx        # Root layout
+│   ├── page.tsx          # Home page
+│   └── globals.css       # Global styles
+├── lib/                  # Utilities and configurations
+│   └── prisma.ts         # Prisma client singleton
+├── prisma/
+│   └── schema.prisma     # Database schema
+├── tests/
+│   └── e2e/              # Playwright E2E tests
 ├── scripts/
-│   └── seed.ts          # Database seeding script
+│   └── seed.ts           # Database seeding script
+├── .github/
+│   └── workflows/
+│       └── ci.yml        # GitHub Actions CI pipeline
+├── sentry.*.config.ts    # Sentry configuration
+├── instrumentation.ts    # Next.js instrumentation
+├── playwright.config.ts  # Playwright configuration
+├── .nvmrc                # Node version specification
 └── package.json
 ```
 
 ## Available Scripts
 
 - `npm run dev` - Start development server
-- `npm run build` - Build for production
+- `npm run build` - Build for production (includes Prisma client generation)
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
 - `npm run typecheck` - Run TypeScript type checking
+- `npm run test:e2e` - Run Playwright E2E tests
+- `npm run prisma:generate` - Generate Prisma client
+- `npm run prisma:migrate` - Run database migrations (dev)
+- `npm run prisma:deploy` - Deploy migrations (production)
+- `npm run prisma:studio` - Open Prisma Studio (database GUI)
 - `npm run seed` - Seed the database
 
 ## Features
@@ -153,10 +203,17 @@ ta-management/
 
 ## CI/CD
 
-GitHub Actions workflow included for:
-- Build verification
-- Linting
-- Type checking
+GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every PR and push to main:
+- Dependency installation
+- ESLint checks
+- TypeScript type checking
+- Production build verification
+
+To enable branch protection:
+1. Go to Repository Settings > Branches
+2. Add a branch protection rule for `main`
+3. Require status checks to pass before merging
+4. Select the "CI / build" check
 
 ## Security Features
 
