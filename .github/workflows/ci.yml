@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Lint & Build (Next.js)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # If you keep package-lock.json (recommended), use npm ci for reproducible builds.
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --legacy-peer-deps
+          fi
+
+      # Optional: only if you have "lint" script in package.json
+      - name: Lint
+        run: |
+          if npm run | grep -q "lint"; then
+            npm run lint
+          else
+            echo "No lint script; skipping"
+          fi
+
+      - name: Build
+        run: npm run build
+
+      # Keep build artifacts for debugging (optional)
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: |
+            .next
+            next.config.js
+            package.json
+            package-lock.json
