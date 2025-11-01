@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 
 const checkScheduleSchema = z.object({
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     const { taId, courseId, hours } = checkScheduleSchema.parse(body)
 
     // Get TA's current assignments
-    const ta = await db.teachingAssistant.findUnique({
+    const ta = await prisma.teachingAssistant.findUnique({
       where: { id: taId },
       include: {
         assignments: true,
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check course capacity
-    const course = await db.course.findUnique({
+    const course = await prisma.course.findUnique({
       where: { id: courseId },
       include: {
         assignments: true,

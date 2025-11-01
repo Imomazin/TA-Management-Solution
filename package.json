@@ -15,7 +15,7 @@
     "test:ui": "vitest --ui",
     "test:e2e": "playwright test",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma db push --accept-data-loss --skip-generate && next build",
+    "vercel-build": "echo 'Skipping Prisma DB Push on Vercel' && prisma generate && next build",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",

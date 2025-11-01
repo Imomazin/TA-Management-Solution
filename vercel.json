@@ -4,8 +4,5 @@
       "path": "/api/cron/refresh-stats",
       "schedule": "0 2 * * *"
     }
-  ],
-  "env": {
-    "DATABASE_URL": "file:./prisma/dev.db"
-  }
+  ]
 }

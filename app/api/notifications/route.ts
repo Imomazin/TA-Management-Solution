@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { prisma } from "@/lib/prisma"
 import { createNotificationSchema } from "@/lib/validators"
 
 export async function GET(request: NextRequest) {
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     if (userId) where.userId = userId
     if (read !== null) where.read = read === "true"
 
-    const notifications = await db.notification.findMany({
+    const notifications = await prisma.notification.findMany({
       where,
       include: {
         user: true,
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validated = createNotificationSchema.parse(body)
 
-    const notification = await db.notification.create({
+    const notification = await prisma.notification.create({
       data: validated,
       include: {
         user: true,

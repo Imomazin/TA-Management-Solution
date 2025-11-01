@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { prisma } from "@/lib/prisma"
 import { createTimesheetSchema } from "@/lib/validators"
 
 export async function GET(request: NextRequest) {
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     if (taId) where.taId = taId
     if (status) where.status = status
 
-    const timesheets = await db.timesheet.findMany({
+    const timesheets = await prisma.timesheet.findMany({
       where,
       include: {
         ta: {
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validated = createTimesheetSchema.parse(body)
 
-    const timesheet = await db.timesheet.create({
+    const timesheet = await prisma.timesheet.create({
       data: validated,
       include: {
         ta: {
