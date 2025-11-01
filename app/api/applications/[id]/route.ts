@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { prisma } from "@/lib/prisma"
 import { updateApplicationSchema } from "@/lib/validators"
 
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const application = await db.application.findUnique({
+    const application = await prisma.application.findUnique({
       where: { id },
       include: {
         user: true,
@@ -41,7 +41,7 @@ export async function PUT(
     const body = await request.json()
     const validated = updateApplicationSchema.parse(body)
 
-    const application = await db.application.update({
+    const application = await prisma.application.update({
       where: { id },
       data: validated,
       include: {
@@ -65,7 +65,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    await db.application.delete({
+    await prisma.application.delete({
       where: { id },
     })
 

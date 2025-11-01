@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { prisma } from "@/lib/prisma"
 import { updateNotificationSchema } from "@/lib/validators"
 
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const notification = await db.notification.findUnique({
+    const notification = await prisma.notification.findUnique({
       where: { id },
       include: {
         user: true,
@@ -41,7 +41,7 @@ export async function PUT(
     const body = await request.json()
     const validated = updateNotificationSchema.parse(body)
 
-    const notification = await db.notification.update({
+    const notification = await prisma.notification.update({
       where: { id },
       data: validated,
       include: {
@@ -65,7 +65,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    await db.notification.delete({
+    await prisma.notification.delete({
       where: { id },
     })
 

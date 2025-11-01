@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { prisma } from "@/lib/prisma"
 import { updateTimesheetSchema } from "@/lib/validators"
 
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const timesheet = await db.timesheet.findUnique({
+    const timesheet = await prisma.timesheet.findUnique({
       where: { id },
       include: {
         ta: {
@@ -45,7 +45,7 @@ export async function PUT(
     const body = await request.json()
     const validated = updateTimesheetSchema.parse(body)
 
-    const timesheet = await db.timesheet.update({
+    const timesheet = await prisma.timesheet.update({
       where: { id },
       data: validated,
       include: {
@@ -73,7 +73,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    await db.timesheet.delete({
+    await prisma.timesheet.delete({
       where: { id },
     })
 

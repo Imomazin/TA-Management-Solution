@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { prisma } from "@/lib/prisma"
 import { createAssignmentSchema } from "@/lib/validators"
 
 export async function GET(request: NextRequest) {
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     if (courseId) where.courseId = courseId
     if (taId) where.taId = taId
 
-    const assignments = await db.assignment.findMany({
+    const assignments = await prisma.assignment.findMany({
       where,
       include: {
         course: true,
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validated = createAssignmentSchema.parse(body)
 
-    const assignment = await db.assignment.create({
+    const assignment = await prisma.assignment.create({
       data: validated,
       include: {
         course: true,
