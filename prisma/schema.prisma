@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -16,7 +16,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  applications     Application[]
   timesheets       Timesheet[]
   assignments      Assignment[]
   logs             AuditLog[]
@@ -56,22 +55,69 @@ model TeachingAssistant {
 }
 
 model Application {
-  id        String    @id @default(cuid())
-  userId    String
-  status    AppStatus @default(PENDING)
-  resumeUrl String?
-  statement String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id               String   @id @default(cuid())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
+  // applicant info
+  firstName        String
+  lastName         String
+  email            String   @unique
+  program          String
+  gpa              Float?
+  skills           String[]
+  answersJson      Json
+
+  // resume
+  resumeUrl        String?
+  resumeText       String?
+  resumeKeywords   String[]
+
+  // AI evaluation
+  aiScore          Int?
+  aiRationale      String?
+  aiRecommendation ApplicationRecommendation?
+
+  // workflow state
+  status           ApplicationStatus @default(DRAFT)
+
+  // relations
+  history          ApplicationHistory[]
+
+  @@index([email])
+  @@index([status])
 }
 
-enum AppStatus {
-  PENDING
-  UNDER_REVIEW
-  ACCEPTED
+model ApplicationHistory {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  applicationId String
+  actorUserId   String?
+  action        String
+  notes         String?
+
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+}
+
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  STAFF_REVIEW
+  RECOMMENDED
+  COMMITTEE_REVIEW
+  OFFER_APPROVED
+  OFFER_DECLINED
   REJECTED
+  WITHDRAWN
+}
+
+enum ApplicationRecommendation {
+  STRONGLY_RECOMMEND
+  RECOMMEND
+  NEUTRAL
+  NOT_RECOMMEND
 }
 
 model Assignment {
