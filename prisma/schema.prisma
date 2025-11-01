@@ -1,297 +1,130 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-// User roles enum
-enum UserRole {
-  ADMIN
-  STAFF
-  TA
-  INSTRUCTOR
-  COMMITTEE_MEMBER
-}
-
-// Application status enum
-enum ApplicationStatus {
-  DRAFT
-  SUBMITTED
-  UNDER_REVIEW
-  INTERVIEW_SCHEDULED
-  APPROVED
-  REJECTED
-  OFFER_EXTENDED
-  OFFER_ACCEPTED
-  OFFER_DECLINED
-}
-
-// Organization/Department model
-model Organization {
-  id          String   @id @default(cuid())
-  name        String
-  code        String   @unique // e.g., "CS", "MATH"
-  description String?
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  courses Course[]
-  users   UserOrganization[]
-
-  @@map("organizations")
-}
-
-// User model
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  firstName     String
-  lastName      String
-  phone         String?
-  studentId     String?   @unique
-  active        Boolean   @default(true)
-  emailVerified DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  organizations  UserOrganization[]
-  applications   Application[]
-  assignments    Assignment[]
-  availability   Availability[]
-  timesheets     Timesheet[]
-  notifications  Notification[]
-  auditLogs      AuditLog[]
-  reviewsGiven   Review[]           @relation("reviewer")
-  reviewsReceived Review[]          @relation("reviewee")
-
-  @@map("users")
-}
-
-// Junction table for User-Organization many-to-many relationship
-model UserOrganization {
-  id             String   @id @default(cuid())
-  userId         String
-  organizationId String
-  role           UserRole @default(TA)
-  active         Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, organizationId, role])
-  @@index([userId])
-  @@index([organizationId])
-  @@map("user_organizations")
-}
-
-// Course model
-model Course {
-  id             String  @id @default(cuid())
-  code           String // e.g., "CS101"
-  name           String
-  description    String?
-  credits        Int     @default(3)
-  organizationId String
-  active         Boolean @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  organization Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  sections     CourseSection[]
-  applications Application[]
-
-  @@unique([code, organizationId])
-  @@index([organizationId])
-  @@map("courses")
-}
-
-// Course section model
-model CourseSection {
-  id           String   @id @default(cuid())
-  courseId     String
-  sectionCode  String // e.g., "001", "002"
-  semester     String // e.g., "Fall 2024"
-  year         Int
-  instructorId String?
-  capacity     Int      @default(30)
-  enrolled     Int      @default(0)
-  schedule     String? // JSON string with day/time info
-  location     String?
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  course      Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  assignments Assignment[]
-
-  @@unique([courseId, sectionCode, semester, year])
-  @@index([courseId])
-  @@map("course_sections")
-}
-
-// TA Application model
-model Application {
-  id               String            @id @default(cuid())
-  userId           String
-  courseId         String
-  semester         String
-  year             Int
-  status           ApplicationStatus @default(DRAFT)
-  gpa              Float?
-  previousTA       Boolean           @default(false)
-  previousCourses  String? // JSON array of course codes
-  statement        String? // Why they want to be a TA
-  availability     String? // JSON string with weekly schedule
-  preferredHours   Int               @default(10)
-  maxHours         Int               @default(20)
-  submittedAt      DateTime?
-  reviewedAt       DateTime?
-  reviewedBy       String?
-  reviewNotes      String?
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  reviews Review[]
-
-  @@unique([userId, courseId, semester, year])
-  @@index([userId])
-  @@index([courseId])
-  @@index([status])
-  @@map("applications")
-}
-
-// TA Assignment model
-model Assignment {
-  id              String   @id @default(cuid())
-  userId          String
-  courseSectionId String
-  semester        String
-  year            Int
-  hoursPerWeek    Int
-  startDate       DateTime
-  endDate         DateTime
-  rate            Float? // Hourly rate
-  status          String   @default("active") // active, completed, cancelled
-  notes           String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  courseSection CourseSection @relation(fields: [courseSectionId], references: [id], onDelete: Cascade)
-  timesheets    Timesheet[]
-
-  @@index([userId])
-  @@index([courseSectionId])
-  @@map("assignments")
-}
-
-// Availability model for TAs
-model Availability {
   id        String   @id @default(cuid())
-  userId    String
-  dayOfWeek Int // 0 = Sunday, 1 = Monday, etc.
-  startTime String // e.g., "09:00"
-  endTime   String // e.g., "17:00"
-  semester  String
-  year      Int
+  email     String   @unique
+  name      String?
+  role      Role     @default(ADMIN)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("availability")
+  applications     Application[]
+  timesheets       Timesheet[]
+  assignments      Assignment[]
+  logs             AuditLog[]
+  notifications    Notification[]
+  teachingAssistant TeachingAssistant?
 }
 
-// Timesheet model for tracking TA hours
-model Timesheet {
-  id           String    @id @default(cuid())
-  assignmentId String
-  userId       String
-  weekStarting DateTime // Start of the work week
-  hoursWorked  Float
-  description  String?
-  submittedAt  DateTime?
-  approvedAt   DateTime?
-  approvedBy   String?
-  status       String    @default("draft") // draft, submitted, approved, rejected
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-
-  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([assignmentId])
-  @@index([userId])
-  @@map("timesheets")
+enum Role {
+  ADMIN
+  COORDINATOR
+  TA
 }
 
-// Review model for committee reviews of applications
-model Review {
-  id            String   @id @default(cuid())
-  applicationId String
-  reviewerId    String
-  rating        Int? // 1-5 scale
-  comments      String?
-  recommendation String? // e.g., "APPROVE", "REJECT", "INTERVIEW"
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+model Course {
+  id        String   @id @default(cuid())
+  code      String
+  title     String
+  term      String
+  capacity  Int      @default(3)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  reviewer    User        @relation("reviewer", fields: [reviewerId], references: [id], onDelete: Cascade)
-
-  @@index([applicationId])
-  @@index([reviewerId])
-  @@map("reviews")
+  assignments Assignment[]
 }
 
-// Notification model
-model Notification {
+model TeachingAssistant {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  maxHours  Int      @default(20)
+  skills    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id])
+  timesheets  Timesheet[]
+  assignments Assignment[]
+}
+
+model Application {
   id        String    @id @default(cuid())
   userId    String
-  title     String
-  message   String
-  type      String // e.g., "APPLICATION_STATUS", "ASSIGNMENT", "TIMESHEET"
-  read      Boolean   @default(false)
-  link      String?
+  status    AppStatus @default(PENDING)
+  resumeUrl String?
+  statement String?
   createdAt DateTime  @default(now())
-  readAt    DateTime?
+  updatedAt DateTime  @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([read])
-  @@map("notifications")
+  user User @relation(fields: [userId], references: [id])
 }
 
-// Audit log for tracking important actions
+enum AppStatus {
+  PENDING
+  UNDER_REVIEW
+  ACCEPTED
+  REJECTED
+}
+
+model Assignment {
+  id        String   @id @default(cuid())
+  courseId  String
+  taId      String
+  hours     Int      @default(10)
+  role      String   @default("TA")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course Course            @relation(fields: [courseId], references: [id])
+  ta     TeachingAssistant @relation(fields: [taId], references: [id])
+}
+
+model Timesheet {
+  id        String     @id @default(cuid())
+  taId      String
+  weekOf    DateTime
+  hours     Int        @default(0)
+  notes     String?
+  status    TimeStatus @default(SUBMITTED)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  ta TeachingAssistant @relation(fields: [taId], references: [id])
+}
+
+enum TimeStatus {
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  kind      String
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
 model AuditLog {
-  id         String   @id @default(cuid())
-  userId     String?
-  action     String // e.g., "CREATE_APPLICATION", "APPROVE_ASSIGNMENT"
-  entityType String // e.g., "Application", "Assignment"
-  entityId   String
-  changes    String? // JSON string of changes
-  ipAddress  String?
-  userAgent  String?
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  actorId   String
+  action    String
+  target    String?
+  meta      String?
+  createdAt DateTime @default(now())
 
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  @@index([userId])
-  @@index([entityType, entityId])
-  @@index([createdAt])
-  @@map("audit_logs")
+  actor User @relation(fields: [actorId], references: [id])
 }
