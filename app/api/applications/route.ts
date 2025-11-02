@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { prisma } from "@/lib/prisma"
 import { createApplicationSchema } from "@/lib/validators"
 
 export async function GET(request: NextRequest) {
@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     if (status) where.status = status
     if (userId) where.userId = userId
 
-    const applications = await db.application.findMany({
+    const applications = await prisma.application.findMany({
       where,
       include: {
         user: true,
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validated = createApplicationSchema.parse(body)
 
-    const application = await db.application.create({
+    const application = await prisma.application.create({
       data: validated,
       include: {
         user: true,

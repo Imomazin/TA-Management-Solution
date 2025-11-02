@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { prisma } from "@/lib/prisma"
 import { updateAssignmentSchema } from "@/lib/validators"
 
 export async function GET(
@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const assignment = await db.assignment.findUnique({
+    const assignment = await prisma.assignment.findUnique({
       where: { id },
       include: {
         course: true,
@@ -46,7 +46,7 @@ export async function PUT(
     const body = await request.json()
     const validated = updateAssignmentSchema.parse(body)
 
-    const assignment = await db.assignment.update({
+    const assignment = await prisma.assignment.update({
       where: { id },
       data: validated,
       include: {
@@ -75,7 +75,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    await db.assignment.delete({
+    await prisma.assignment.delete({
       where: { id },
     })
 

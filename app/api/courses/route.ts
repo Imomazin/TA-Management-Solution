@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { db } from "@/lib/db"
+import { prisma } from "@/lib/prisma"
 import { createCourseSchema } from "@/lib/validators"
 
 export async function GET(request: NextRequest) {
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
     const where = term ? { term } : {}
 
-    const courses = await db.course.findMany({
+    const courses = await prisma.course.findMany({
       where,
       orderBy: { createdAt: "desc" },
     })
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validated = createCourseSchema.parse(body)
 
-    const course = await db.course.create({
+    const course = await prisma.course.create({
       data: validated,
     })
 

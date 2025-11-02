@@ -36,5 +36,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# database files
+*.db
+*.db-journal
+prisma/*.db
+prisma/*.db-journal
+
 # github workflows - use push-workflow.sh to add this with your credentials
 .github/
