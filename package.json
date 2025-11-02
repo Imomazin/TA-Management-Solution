@@ -2,32 +2,27 @@
   "name": "ta-management-solution",
   "version": "1.0.0",
   "private": true,
-  "description": "Talent & Assignment Management Platform built with Next.js, Prisma, and PostgreSQL.",
-  "author": "Imomazin",
-  "license": "MIT",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
-    "start": "npm run prisma:migrate && next start -p $PORT",
+    "build": "next build",
     "postinstall": "prisma generate",
-    "prisma:migrate": "prisma migrate deploy",
-    "lint": "next lint",
-    "format": "prettier --write ."
+    "prisma:migrate": "prisma db push --accept-data-loss",
+    "start": "npm run prisma:migrate && next start -p $PORT",
+    "lint": "next lint"
   },
   "dependencies": {
-    "@prisma/client": "^6.0.0",
-    "next": "15.0.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@prisma/client": "^6.18.0",
+    "next": "14.2.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "prisma": "^6.0.0",
-    "typescript": "^5.6.3",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "15.0.3",
-    "prettier": "^3.3.3"
+    "eslint": "8.56.0",
+    "eslint-config-next": "14.2.3",
+    "prisma": "^6.18.0",
+    "typescript": "^5.3.3"
   },
   "engines": {
-    "node": ">=18.18"
+    "node": ">=20"
   }
 }
