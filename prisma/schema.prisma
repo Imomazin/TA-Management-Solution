@@ -16,8 +16,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  timesheets       Timesheet[]
-  assignments      Assignment[]
   logs             AuditLog[]
   notifications    Notification[]
   teachingAssistant TeachingAssistant?
