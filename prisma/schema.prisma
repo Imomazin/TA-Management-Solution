@@ -16,6 +16,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  timesheets       Timesheet[]      @relation("UserTimesheets")
+  assignments      Assignment[]     @relation("UserAssignments")
   logs             AuditLog[]
   notifications    Notification[]
   teachingAssistant TeachingAssistant?
@@ -122,6 +124,7 @@ model Assignment {
   id        String   @id @default(cuid())
   courseId  String
   taId      String
+  userId    String?
   hours     Int      @default(10)
   role      String   @default("TA")
   createdAt DateTime @default(now())
@@ -129,11 +132,13 @@ model Assignment {
 
   course Course            @relation(fields: [courseId], references: [id])
   ta     TeachingAssistant @relation(fields: [taId], references: [id])
+  user   User?             @relation("UserAssignments", fields: [userId], references: [id])
 }
 
 model Timesheet {
   id        String     @id @default(cuid())
   taId      String
+  userId    String?
   weekOf    DateTime
   hours     Int        @default(0)
   notes     String?
@@ -141,7 +146,8 @@ model Timesheet {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
-  ta TeachingAssistant @relation(fields: [taId], references: [id])
+  ta   TeachingAssistant @relation(fields: [taId], references: [id])
+  user User?             @relation("UserTimesheets", fields: [userId], references: [id])
 }
 
 enum TimeStatus {
