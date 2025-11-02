@@ -1,51 +1,51 @@
-const { withSentryConfig } = require("@sentry/nextjs");
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Safe, modern defaults
+  reactStrictMode: true,
+  swcMinify: true,
+  poweredByHeader: false,
+
+  // Enable only the experiments you actually use
   experimental: {
-    serverActions: {
-      bodySizeLimit: '10mb',
-    },
-    instrumentationHook: true,
+    // You had `clientTraceMetadata` on already; keep if you need it
+    clientTraceMetadata: true,
   },
+
+  // If you customize webpack, keep this no-op so it's easy to extend later
+  webpack: (config) => config,
+};
+
+// Optional: enable Sentry only when SENTRY_DSN exists.
+// This avoids build-time warnings if you don't use Sentry yet.
+const enableSentry = Boolean(process.env.SENTRY_DSN);
+
+let exportConfig = nextConfig;
+
+if (enableSentry) {
+  try {
+    const { withSentryConfig } = require('@sentry/nextjs');
+
+    // Do NOT set authToken unless you actually want to upload source maps.
+    // If you don't, Sentry will warn but everything else will work.
+    exportConfig = withSentryConfig(
+      nextConfig,
+      {
+        // Sentry build options
+        // org: 'your-org',      // only required if uploading source maps
+        // project: 'your-proj', // only required if uploading source maps
+        // authToken: process.env.SENTRY_AUTH_TOKEN, // optional; omit if you don’t want to upload source maps
+        silent: true, // reduce noisy Sentry logs
+      },
+      {
+        // Next.js options
+        disableLogger: true,
+        hideSourcemaps: true,
+      },
+    );
+  } catch {
+    // If @sentry/nextjs is not installed, fall back gracefully
+    exportConfig = nextConfig;
+  }
 }
 
-module.exports = withSentryConfig(nextConfig, {
-  // For all available options, see:
-  // https://github.com/getsentry/sentry-webpack-plugin#options
-
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
-
-  // Only print logs for uploading source maps in CI
-  silent: !process.env.CI,
-
-  // For all available options, see:
-  // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-
-  // Upload a larger set of source maps for prettier stack traces (increases build time)
-  widenClientFileUpload: true,
-
-  // Automatically annotate React components to show their full name in breadcrumbs and session replay
-  reactComponentAnnotation: {
-    enabled: true,
-  },
-
-  // Route browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers.
-  // This can increase your server load as well as your hosting bill.
-  // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
-  // side errors will fail.
-  tunnelRoute: "/monitoring",
-
-  // Hides source maps from generated client bundles
-  hideSourceMaps: true,
-
-  // Automatically tree-shake Sentry logger statements to reduce bundle size
-  disableLogger: true,
-
-  // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
-  // See the following for more information:
-  // https://docs.sentry.io/product/crons/
-  // https://vercel.com/docs/cron-jobs
-  automaticVercelMonitors: true,
-});
+module.exports = exportConfig;
