@@ -1,12 +1,46 @@
+// prisma/schema.prisma
+
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  binaryTargets = ["native", "debian-openssl-3.0.x"] // OK for Render's Linux images
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+/* ============================
+   Enums
+   ============================ */
+
+enum Role {
+  ADMIN
+  COORDINATOR
+  TA
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AssignmentStatus {
+  PENDING
+  ACTIVE
+  REVOKED
+}
+
+enum TimesheetStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/* ============================
+   Core Models
+   ============================ */
 
 model User {
   id        String   @id @default(cuid())
@@ -16,18 +50,15 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  applications     Application[]
-  timesheets       Timesheet[]
-  assignments      Assignment[]
-  logs             AuditLog[]
-  notifications    Notification[]
+  // --- Back relations ---
+  applications  Application[]
+  timesheets    Timesheet[]    @relation("UserTimesheets")
+  assignments   Assignment[]   @relation("UserAssignments")
+  logs          AuditLog[]
+  notifications Notification[]
   teachingAssistant TeachingAssistant?
-}
 
-enum Role {
-  ADMIN
-  COORDINATOR
-  TA
+  @@index([email])
 }
 
 model Course {
@@ -39,92 +70,98 @@ model Course {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  assignments Assignment[]
+  // Course relationships
+  assignments  Assignment[]
+  applications Application[]
+
+  @@index([code, term])
 }
 
 model TeachingAssistant {
   id        String   @id @default(cuid())
   userId    String   @unique
-  maxHours  Int      @default(20)
-  skills    String
+  hours     Int      @default(20)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user        User         @relation(fields: [userId], references: [id])
-  timesheets  Timesheet[]
-  assignments Assignment[]
+  // link to the owning user (usually role TA)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+/* ============================
+   Relational Children
+   ============================ */
+
+/* Fix 1: Timesheet has FK -> User with clear opposite side on User.timesheets */
+model Timesheet {
+  id        String          @id @default(cuid())
+  userId    String
+  weekStart DateTime
+  hours     Int             @default(0)
+  status    TimesheetStatus @default(PENDING)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  user User @relation("UserTimesheets", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/* Fix 2: Assignment has FK -> User with clear opposite side on User.assignments */
+model Assignment {
+  id        String            @id @default(cuid())
+  userId    String
+  courseId  String
+  status    AssignmentStatus  @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  user   User   @relation("UserAssignments", fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([courseId])
+}
+
+/* ============================
+   Supporting Models
+   ============================ */
 
 model Application {
-  id        String    @id @default(cuid())
+  id        String             @id @default(cuid())
   userId    String
-  status    AppStatus @default(PENDING)
-  resumeUrl String?
-  statement String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  user User @relation(fields: [userId], references: [id])
-}
-
-enum AppStatus {
-  PENDING
-  UNDER_REVIEW
-  ACCEPTED
-  REJECTED
-}
-
-model Assignment {
-  id        String   @id @default(cuid())
   courseId  String
-  taId      String
-  hours     Int      @default(10)
-  role      String   @default("TA")
+  statement String?
+  status    ApplicationStatus  @default(PENDING)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([courseId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
-  course Course            @relation(fields: [courseId], references: [id])
-  ta     TeachingAssistant @relation(fields: [taId], references: [id])
-}
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-model Timesheet {
-  id        String     @id @default(cuid())
-  taId      String
-  weekOf    DateTime
-  hours     Int        @default(0)
-  notes     String?
-  status    TimeStatus @default(SUBMITTED)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-
-  ta TeachingAssistant @relation(fields: [taId], references: [id])
-}
-
-enum TimeStatus {
-  SUBMITTED
-  APPROVED
-  REJECTED
+  @@index([userId])
 }
 
 model Notification {
   id        String   @id @default(cuid())
   userId    String
-  kind      String
-  title     String
-  body      String
+  message   String
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
-}
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-model AuditLog {
-  id        String   @id @default(cuid())
-  actorId   String
-  action    String
-  target    String?
-  meta      String?
-  createdAt DateTime @default(now())
-
-  actor User @relation(fields: [actorId], references: [id])
+  @@index([userId])
 }
